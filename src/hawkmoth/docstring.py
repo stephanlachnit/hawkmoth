@@ -402,3 +402,21 @@ class ClassDocstring(_CompoundDocstring):
 class EnumClassDocstring(_CompoundDocstring):
     _indent = 1
     _fmt = '.. cpp:enum-class:: {name}'
+
+class NamespaceDocstring(Docstring):
+    def __init__(self, namespace, line, pp_action, nest):
+        super().__init__(meta={'line': line, 'namespace': namespace, 'action': pp_action}, nest=nest)
+        self._pp_action = pp_action
+        self._namespace = namespace
+
+    def _match(self, filter_types=None, filter_names=None):
+        return True
+
+    def walk(self, recurse=True, filter_types=None, filter_names=None):
+        yield self
+
+    def get_docstring(self, process_docstring=None):
+        pp_namespace = self._namespace if self._pp_action == 'push' else ''
+        lines = ['', f'.. cpp:namespace-{self._pp_action}:: {pp_namespace}', '']
+        Docstring._nest_lines(lines, self._nest)
+        return lines, self.get_line()

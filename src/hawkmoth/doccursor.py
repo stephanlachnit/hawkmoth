@@ -102,6 +102,14 @@ class DocCursor:
         return self._comment.extent.start.line if self._comment else None
 
     @property
+    def extent_start(self):
+        return self._cc.extent.start.line
+
+    @property
+    def extent_end(self):
+        return self._cc.extent.end.line
+
+    @property
     def args(self):
         if self._cc.kind == CursorKind.MACRO_DEFINITION:
             return self._get_macro_args()

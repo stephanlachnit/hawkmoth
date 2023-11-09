@@ -318,6 +318,26 @@ def _parse_undocumented_block(errors, cursor, nest):
                 if c.comment:
                     ret.extend(_recursive_parse(errors, c, nest))
 
+    elif cursor.kind == CursorKind.NAMESPACE:
+        # ignore internal STL namespaces
+        if cursor.name in ['__cxx11', '__gnu_cxx', '__detail', '__debug', '__gnu_debug', '__cxxabiv1']:
+            return ret
+        # iterate over namespace
+        ret_namespace = []
+        for c in cursor.get_children():
+            if c.comment:
+                ret_namespace.extend(_recursive_parse(errors, c, nest))
+            else:
+                ret_namespace.extend(_parse_undocumented_block(errors, c, nest))
+        # only add namespace if it has children
+        if len(ret_namespace) > 0:
+            # add namespace-push docstring
+            ret.append(docstring.NamespaceDocstring(cursor.name, cursor.extent_start, 'push', nest))
+            # add iteratedion over namespace
+            ret.extend(ret_namespace)
+            # add namespace-pop docstring
+            ret.append(docstring.NamespaceDocstring(cursor.name, cursor.extent_end, 'pop', nest))
+
     return ret
 
 def _language_option(filename, domain):

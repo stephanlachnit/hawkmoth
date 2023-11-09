@@ -111,6 +111,11 @@ class _AutoBaseDirective(SphinxDirective):
         for docstrings in root.walk(recurse=False, filter_types=self._docstring_types,
                                     filter_names=self._get_names()):
             num_matches += 1
+
+            # do not count NamespaceDocstring as match
+            if type(docstrings) is docstring.NamespaceDocstring:
+                num_matches -= 1
+
             for docstr in docstrings.walk(filter_names=self._get_members()):
                 lines, line_number = docstr.get_docstring(process_docstring=process_docstring)
                 for line in lines:
